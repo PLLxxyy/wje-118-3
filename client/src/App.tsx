@@ -9,6 +9,7 @@ import EventDetail from './pages/EventDetail';
 import Apply from './pages/Apply';
 import MySchedule from './pages/MySchedule';
 import Checkin from './pages/Checkin';
+import MyHours from './pages/MyHours';
 import Notifications from './pages/Notifications';
 import EventList from './pages/organizer/EventList';
 import EventForm from './pages/organizer/EventForm';
@@ -53,6 +54,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Checkin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-hours"
+          element={
+            <ProtectedRoute>
+              <MyHours />
             </ProtectedRoute>
           }
         />

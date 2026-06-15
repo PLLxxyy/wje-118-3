@@ -35,6 +35,7 @@ export default function Navbar() {
             <>
               <Link to="/my-schedule" style={{ color: '#555', fontSize: 14 }}>我的排班</Link>
               <Link to="/checkin" style={{ color: '#555', fontSize: 14 }}>签到打卡</Link>
+              <Link to="/my-hours" style={{ color: '#555', fontSize: 14 }}>服务时长</Link>
               <Link to="/notifications" style={{ color: '#555', fontSize: 14 }}>通知</Link>
             </>
           )}

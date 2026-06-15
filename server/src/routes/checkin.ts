@@ -67,6 +67,70 @@ router.post('/checkout', authMiddleware, (req: Request, res: Response) => {
   }
 });
 
+router.get('/my/hours', authMiddleware, (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user;
+
+    const checkins = db.prepare(`
+      SELECT c.id, c.event_id, c.position_id, c.checkin_time, c.checkout_time,
+             e.name as event_name, e.status as event_status, e.date as event_date,
+             p.name as position_name, p.location_point
+      FROM checkins c
+      JOIN events e ON c.event_id = e.id
+      JOIN positions p ON c.position_id = p.id
+      WHERE c.user_id = ? AND c.checkout_time != ''
+      ORDER BY e.date DESC, c.checkin_time DESC
+    `).all(userId) as any[];
+
+    const eventsMap = new Map<number, {
+      event_id: number;
+      event_name: string;
+      event_date: string;
+      event_status: string;
+      total_hours: number;
+      records: any[];
+    }>();
+
+    let totalHours = 0;
+
+    for (const c of checkins) {
+      const checkinDate = new Date(c.checkin_time);
+      const checkoutDate = new Date(c.checkout_time);
+      const hours = Math.round((checkoutDate.getTime() - checkinDate.getTime()) / 3600000 * 10) / 10;
+
+      if (!eventsMap.has(c.event_id)) {
+        eventsMap.set(c.event_id, {
+          event_id: c.event_id,
+          event_name: c.event_name,
+          event_date: c.event_date,
+          event_status: c.event_status,
+          total_hours: 0,
+          records: [],
+        });
+      }
+
+      const eventGroup = eventsMap.get(c.event_id)!;
+      eventGroup.total_hours = Math.round((eventGroup.total_hours + hours) * 10) / 10;
+      eventGroup.records.push({
+        id: c.id,
+        position_name: c.position_name,
+        location_point: c.location_point,
+        checkin_time: c.checkin_time,
+        checkout_time: c.checkout_time,
+        hours,
+      });
+
+      totalHours = Math.round((totalHours + hours) * 10) / 10;
+    }
+
+    const events = Array.from(eventsMap.values());
+
+    res.json({ total_hours: totalHours, events });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get my checkins (volunteer)
 router.get('/my', authMiddleware, (req: Request, res: Response) => {
   try {

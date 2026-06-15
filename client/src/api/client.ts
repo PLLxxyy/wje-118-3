@@ -129,6 +129,8 @@ export const api = {
 
   getMyCheckins: () => request('/checkins/my'),
 
+  getMyHours: () => request('/checkins/my/hours'),
+
   getEventCheckins: (eventId: number) =>
     request(`/checkins/event/${eventId}`),
 
